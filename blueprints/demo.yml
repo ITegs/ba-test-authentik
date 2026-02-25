@@ -1,0 +1,153 @@
+version: 1
+metadata:
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+  name: BA Demo OIDC App With Passkey Login
+
+entries:
+  - model: authentik_stages_password.passwordstage
+    identifiers:
+      name: BA Demo Password Stage
+    attrs:
+      name: BA Demo Password Stage
+      backends:
+        - authentik.core.auth.InbuiltBackend
+
+  - model: authentik_flows.flow
+    identifiers:
+      slug: ba-demo-passkey-login
+    attrs:
+      name: BA Demo Passkey Login
+      slug: ba-demo-passkey-login
+      designation: authentication
+      title: Sign in with passkey
+      background: ''
+      compatibility_mode: false
+      layout: stacked
+      denied_action: message_continue
+      authentication: none
+
+  - model: authentik_stages_authenticator_validate.authenticatorvalidatestage
+    identifiers:
+      name: BA Demo Passkey Validate Stage
+    attrs:
+      name: BA Demo Passkey Validate Stage
+      device_classes:
+        - webauthn
+
+  - model: authentik_stages_user_login.userloginstage
+    identifiers:
+      name: BA Demo User Login Stage
+    attrs:
+      name: BA Demo User Login Stage
+
+  - model: authentik_flows.flowstagebinding
+    identifiers:
+      target: !Find [authentik_flows.flow, [slug, ba-demo-passkey-login]]
+      stage: !Find [authentik_stages_authenticator_validate.authenticatorvalidatestage, [name, BA Demo Passkey Validate Stage]]
+      order: 10
+    attrs:
+      target: !Find [authentik_flows.flow, [slug, ba-demo-passkey-login]]
+      stage: !Find [authentik_stages_authenticator_validate.authenticatorvalidatestage, [name, BA Demo Passkey Validate Stage]]
+      order: 10
+
+  - model: authentik_flows.flowstagebinding
+    identifiers:
+      target: !Find [authentik_flows.flow, [slug, ba-demo-passkey-login]]
+      stage: !Find [authentik_stages_user_login.userloginstage, [name, BA Demo User Login Stage]]
+      order: 100
+    attrs:
+      target: !Find [authentik_flows.flow, [slug, ba-demo-passkey-login]]
+      stage: !Find [authentik_stages_user_login.userloginstage, [name, BA Demo User Login Stage]]
+      order: 100
+
+  - model: authentik_stages_identification.identificationstage
+    identifiers:
+      name: BA Demo Identification Stage
+    attrs:
+      name: BA Demo Identification Stage
+      user_fields:
+        - username
+        - email
+      password_stage: !Find [authentik_stages_password.passwordstage, [name, BA Demo Password Stage]]
+      passwordless_flow: !Find [authentik_flows.flow, [slug, ba-demo-passkey-login]]
+
+  - model: authentik_flows.flow
+    identifiers:
+      slug: ba-demo-web-login
+    attrs:
+      name: BA Demo Web Login
+      slug: ba-demo-web-login
+      designation: authentication
+      title: Sign in to Demo App
+      background: ''
+      compatibility_mode: false
+      layout: stacked
+      denied_action: message_continue
+      authentication: none
+
+  - model: authentik_flows.flowstagebinding
+    identifiers:
+      target: !Find [authentik_flows.flow, [slug, ba-demo-web-login]]
+      stage: !Find [authentik_stages_identification.identificationstage, [name, BA Demo Identification Stage]]
+      order: 10
+    attrs:
+      target: !Find [authentik_flows.flow, [slug, ba-demo-web-login]]
+      stage: !Find [authentik_stages_identification.identificationstage, [name, BA Demo Identification Stage]]
+      order: 10
+
+  - model: authentik_flows.flowstagebinding
+    identifiers:
+      target: !Find [authentik_flows.flow, [slug, ba-demo-web-login]]
+      stage: !Find [authentik_stages_user_login.userloginstage, [name, BA Demo User Login Stage]]
+      order: 30
+    attrs:
+      target: !Find [authentik_flows.flow, [slug, ba-demo-web-login]]
+      stage: !Find [authentik_stages_user_login.userloginstage, [name, BA Demo User Login Stage]]
+      order: 30
+
+  - model: authentik_flows.flow
+    identifiers:
+      slug: ba-demo-authorization
+    attrs:
+      name: BA Demo Authorization
+      slug: ba-demo-authorization
+      designation: authorization
+      title: Authorize Demo App
+      background: ''
+      compatibility_mode: false
+      layout: stacked
+      denied_action: message_continue
+      authentication: none
+
+  - model: authentik_providers_oauth2.oauth2provider
+    identifiers:
+      name: BA Demo OIDC Provider
+    attrs:
+      name: BA Demo OIDC Provider
+      client_type: public
+      client_id: demo-app
+      authentication_flow: !Find [authentik_flows.flow, [slug, ba-demo-web-login]]
+      authorization_flow: !Find [authentik_flows.flow, [slug, ba-demo-authorization]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      redirect_uris:
+        - matching_mode: strict
+          url: http://localhost:3000
+
+  - model: authentik_core.application
+    identifiers:
+      slug: demo
+    attrs:
+      name: BA Demo App
+      slug: demo
+      provider: !Find [authentik_providers_oauth2.oauth2provider, [name, BA Demo OIDC Provider]]
+
+  - model: authentik_core.user
+    identifiers:
+      username: demo
+    attrs:
+      username: demo
+      name: Demo User
+      email: demo@example.local
+      is_active: true
+      password: demo

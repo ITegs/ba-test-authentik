@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentik Demo App</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Authentik Demo App</h1>
+      <p class="subtitle">OIDC login via Authorization Code + PKCE</p>
+
+      <section class="card">
+        <div class="row">
+          <span>Status:</span>
+          <strong id="auth-status">checking...</strong>
+        </div>
+        <div class="actions">
+          <button id="login-btn">Login</button>
+          <button id="logout-btn" disabled>Logout</button>
+          <button id="register-passkey-btn" disabled>Register Passkey</button>
+          <button id="refresh-btn" disabled>Refresh Token</button>
+        </div>
+      </section>
+
+      <section class="card" id="user-card" hidden>
+        <h2>User Claims</h2>
+        <pre id="user-info"></pre>
+      </section>
+
+      <section class="card" id="token-card" hidden>
+        <h2>Access Token</h2>
+        <pre id="token-info"></pre>
+      </section>
+    </main>
+  </body>
+</html>

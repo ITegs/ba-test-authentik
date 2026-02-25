@@ -1,0 +1,15 @@
+{
+  "name": "test-authentik",
+  "version": "1.0.0",
+  "description": "Local Authentik IdP setup with demo app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "authentik:up": "docker compose up -d",
+    "authentik:down": "docker compose down",
+    "authentik:logs": "docker compose logs -f server worker postgresql"
+  },
+  "dependencies": {},
+  "private": true
+}
