@@ -63,6 +63,18 @@ services:
       - ./certs:/certs
       - ./blueprints:/blueprints/example
 
+  client:
+    image: node:20-alpine
+    working_dir: /app
+    command: node index.js
+    depends_on:
+      - server
+    ports:
+      - ${CLIENT_PORT:-3000}:3000
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+
 
 volumes:
   database:
